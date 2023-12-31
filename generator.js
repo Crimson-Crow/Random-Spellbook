@@ -150,6 +150,8 @@ const GITHUB_5ETOOLS =
   'https://raw.githubusercontent.com/5etools-mirror-1/5etools-mirror-1.github.io/master/data/spells/';
 const fetchJSON = url => fetch(url).then(resp => resp.json());
 
+const isWizard = classArray => classArray?.some(cls => cls.name === 'Wizard');
+
 Promise.all([
   fetchJSON(GITHUB_5ETOOLS + 'index.json'),
   fetchJSON(GITHUB_5ETOOLS + 'sources.json')
@@ -158,19 +160,23 @@ Promise.all([
     SPELL_LIST = Object.fromEntries(
       (
         await Promise.all(
-          Object.entries(sources).map(async ([id, source]) => [
-            id,
-            (await fetchJSON(GITHUB_5ETOOLS + index[id])).spell
-              .filter(
-                ({ name, level }) =>
-                  level > 0 &&
-                  (
-                    source[name].classVariant?.some(cls => cls.name === 'Wizard') ||
-                    source[name].class?.some(cls => cls.name === 'Wizard')
-                  )
-              )
-              .map(({ name, level, school }) => ({ name, level, school }))
-          ])
+          Object.entries(index).map(async ([id, filename]) => {
+            const source = sources[id];
+            return [
+              id,
+              (await fetchJSON(GITHUB_5ETOOLS + filename)).spell
+                .filter(({ name, level }) => {
+                  const spellInfo = source?.[name];
+                  return (
+                    spellInfo &&
+                    level > 0 &&
+                    (isWizard(spellInfo.classVariant) ||
+                      isWizard(spellInfo.class))
+                  );
+                })
+                .map(({ name, level, school }) => ({ name, level, school }))
+            ];
+          })
         )
       ).filter(([id, spells]) => spells.length > 0)
     );
