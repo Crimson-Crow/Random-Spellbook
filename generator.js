@@ -147,7 +147,7 @@ function fillSourceBooks(sources) {
 }
 
 const GITHUB_5ETOOLS =
-  'https://raw.githubusercontent.com/5etools-mirror-1/5etools-mirror-1.github.io/master/data/spells/';
+  'https://raw.githubusercontent.com/5etools-mirror-2/5etools-mirror-2.github.io/main/data/spells/';
 const fetchJSON = url => fetch(url).then(resp => resp.json());
 
 const isWizard = classArray => classArray?.some(cls => cls.name === 'Wizard');
